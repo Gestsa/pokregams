@@ -3,335 +3,936 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PoKreGaM</title>
-<style>
-    body { font-family: Arial, sans-serif; margin:0; background:#f0f0f0; }
-    header { background:#222; color:white; padding:10px 20px; display:flex; justify-content: space-between; align-items:center; }
-    #languageSelector { margin-right: 20px; }
-    nav button { background:none; border:none; color:white; margin: 0 5px; cursor:pointer; font-weight:bold; }
-    nav button:hover { text-decoration: underline; }
-    #authButtons button { margin-left: 10px; padding:5px 10px; background:#007bff; border:none; border-radius:5px; color:#fff; cursor:pointer; }
-    #authButtons button:hover { background:#0056b3; }
-    main { padding: 20px; max-width: 1100px; margin: auto; background: white; min-height: 80vh; box-sizing: border-box;}
-    .hidden { display:none; }
-    /* Avatars */
-    .avatars { display: flex; flex-wrap: wrap; gap:10px; margin-bottom: 15px; }
-    .avatar { border: 2px solid transparent; cursor: pointer; padding:5px; text-align:center; width: 100px; user-select:none;}
-    .avatar.selected { border-color: #007bff; background:#e0f0ff; }
-    .avatar img { width: 80px; height: 80px; object-fit: contain; }
-    /* Forms */
-    form input, form select, form textarea { padding: 6px; margin: 5px 0; width: 100%; box-sizing: border-box; }
-    form label { font-weight: bold; }
-    form .form-group { margin-bottom: 10px; }
-    /* Profile */
-    #profileHeader { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
-    #profileAvatar img { width: 120px; height: 120px; border-radius: 10px; }
-    #profileInfo { flex-grow: 1; min-width: 200px; }
-    #profileInfo h2 { margin: 0; }
-    #profileStats { display: flex; gap: 15px; margin-top: 10px; flex-wrap: wrap; }
-    #profileStats div { background: #eee; padding: 8px 12px; border-radius: 6px; min-width: 80px; text-align: center; user-select:none;}
-    /* Tabs */
-    #tabs { margin-bottom: 20px; display:flex; flex-wrap: wrap; gap: 5px; }
-    #tabs button { padding: 8px 16px; border: 1px solid #007bff; background: white; color: #007bff; cursor: pointer; border-radius: 5px; user-select:none; }
-    #tabs button.active, #tabs button:hover { background: #007bff; color: white; }
-    section.tabContent { display: none; }
-    section.tabContent.active { display: block; }
-    /* Ranking Table */
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    table, th, td { border: 1px solid #ccc; }
-    th, td { padding: 8px; text-align: center; }
-    /* Friends */
-    #friendsList div { background: #eee; margin: 5px 0; padding: 6px 10px; border-radius: 5px; user-select:none;}
-    #activeFriends { font-style: italic; margin-top: 10px; }
-    /* Buttons */
-    button.primary { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; user-select:none;}
-    button.primary:hover { background: #0056b3; }
-    a.link { color:#007bff; cursor:pointer; text-decoration:underline; user-select:none; }
-    a.link:hover { color:#0056b3; }
-    /* Responsive */
-    @media (max-width:600px){
-        #profileHeader { flex-direction: column; align-items: flex-start;}
-        #profileStats { justify-content: flex-start;}
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PoKreGaM</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
-    /* Styles for the new "All Chats" section */
-    .chat-container {
-        border: 1px solid #ddd;
-        padding: 10px;
-        margin-bottom: 15px;
-        background-color: #f9f9f9;
-        border-radius: 5px;
-    }
-    .chat-header {
-        font-weight: bold;
-        margin-bottom: 5px;
-        color: #333;
-    }
-    .chat-message {
-        margin-bottom: 3px;
-        padding-left: 10px;
-        border-left: 3px solid #007bff;
-    }
-    .chat-message strong {
-        color: #555;
-    }
-    /* Styles for Posts section */
-    .post {
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 15px;
-        background-color: #fefefe;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    .post-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 10px;
-    }
-    .post-avatar img {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        margin-right: 10px;
-        object-fit: cover;
-    }
-    .post-info {
-        flex-grow: 1;
-    }
-    .post-author {
-        font-weight: bold;
-        color: #333;
-    }
-    .post-time {
-        font-size: 0.8em;
-        color: #777;
-    }
-    .post-content {
-        margin-top: 10px;
-        color: #444;
-        white-space: pre-wrap; /* Preserve formatting */
-    }
-    /* Styles for Ranking type buttons */
-    #rankingTypeButtons {
-        margin-bottom: 15px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 5px;
-        justify-content: center; /* Center buttons */
-    }
-    #rankingTypeButtons button {
-        padding: 8px 15px;
-        border: 1px solid #007bff;
-        background: white;
-        color: #007bff;
-        cursor: pointer;
-        border-radius: 5px;
-    }
-    #rankingTypeButtons button.active,
-    #rankingTypeButtons button:hover {
-        background: #007bff;
-        color: white;
-    }
-</style>
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8em;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap; /* Allow controls to wrap */
+        }
+
+        .header-controls button,
+        .header-controls select {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #555;
+            color: white;
+            transition: background-color 0.2s;
+            white-space: nowrap; /* Prevent text wrapping inside buttons */
+        }
+
+        .header-controls button:hover,
+        .header-controls select:hover {
+            background-color: #777;
+        }
+
+        main {
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align items to the top */
+        }
+
+        section {
+            background-color: white;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            box-sizing: border-box;
+            margin-bottom: 20px; /* Add some margin below sections */
+        }
+
+        section.hidden {
+            display: none;
+        }
+
+        h2 {
+            color: #444;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        form label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        form input[type="text"],
+        form input[type="password"],
+        form input[type="email"],
+        form input[type="date"],
+        form select,
+        form textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            margin-top: 5px;
+            box-sizing: border-box; /* Include padding and border in width */
+        }
+
+        form button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.2s;
+        }
+
+        form button:hover {
+            background-color: #0056b3;
+        }
+
+        .error-message {
+            color: #dc3545;
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .success-message {
+            color: #28a745;
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .link-text {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .link-text a, .link-text button {
+            color: #007bff;
+            text-decoration: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 1em;
+            transition: color 0.2s;
+        }
+
+        .link-text a:hover, .link-text button:hover {
+            color: #0056b3;
+        }
+
+        #avatarsContainer {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-items: center;
+        }
+
+        .avatar {
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .avatar img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            display: block;
+            margin: 0 auto 5px;
+        }
+
+        .avatar.selected {
+            border-color: #007bff;
+            background-color: #e0f0ff;
+        }
+
+        /* Profile Section Specific Styles */
+        #profileSection {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 900px; /* Wider for tabs */
+        }
+
+        #profileHeader {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            flex-wrap: wrap; /* Allow wrapping for responsiveness */
+            justify-content: center; /* Center items on wrap */
+            text-align: center;
+        }
+
+        #profileAvatar img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #007bff;
+        }
+
+        #profileInfo {
+            flex-grow: 1;
+        }
+
+        #profileInfo p {
+            margin: 5px 0;
+            font-size: 1.1em;
+        }
+
+        #profileInfo p strong {
+            color: #007bff;
+        }
+
+        #profileInfo span {
+            font-weight: normal;
+        }
+
+        #profileStats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+            justify-content: center; /* Center stats */
+        }
+
+        #profileStats div {
+            background-color: #e9f5ff;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            color: #0056b3;
+            font-weight: bold;
+        }
+
+        #tabs {
+            display: flex;
+            flex-wrap: wrap; /* Allow tabs to wrap */
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+            justify-content: center; /* Center tabs */
+        }
+
+        #tabs button {
+            background-color: #f0f0f0;
+            color: #555;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+            white-space: nowrap; /* Prevent text wrapping inside buttons */
+        }
+
+        #tabs button.active {
+            background-color: white;
+            color: #007bff;
+            border-color: #007bff;
+            border-bottom: 2px solid white; /* Visual trick for active tab */
+            position: relative;
+            z-index: 1;
+        }
+
+        .tabContent {
+            background-color: white;
+            padding: 20px;
+            border-radius: 0 0 8px 8px; /* Match bottom corners with profile section */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Specific tab content styling */
+        #rankingTab h3 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        #rankingTypeButtons {
+            text-align: center;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        #rankingTypeButtons button {
+            padding: 8px 15px;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+            background-color: white;
+            color: #007bff;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #rankingTypeButtons button.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        #rankingTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        #rankingTable th, #rankingTable td {
+            border: 1px solid #ddd;
+            padding: 10px 12px;
+            text-align: left;
+            word-break: break-word; /* Ensure text breaks in cells */
+        }
+
+        #rankingTable th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            color: #555;
+        }
+
+        #rankingTable tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        #rankingTable tbody tr:hover {
+            background-color: #e0f7fa;
+        }
+
+        #rankingTable td button.report-user-btn {
+            background-color: #ffc107;
+            color: #333;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            margin-left: 10px;
+            transition: background-color 0.2s;
+            white-space: nowrap; /* Keep button text on one line */
+        }
+        #rankingTable td button.report-user-btn:hover {
+            background-color: #e0a800;
+        }
+
+
+        /* Posts tab */
+        #writePostSection {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        #postContent {
+            resize: vertical;
+            min-height: 80px;
+            margin-bottom: 10px;
+        }
+
+        #publishPostBtn {
+            width: auto;
+            align-self: flex-end;
+            margin-top: 5px;
+        }
+
+        .post {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #fefefe;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .post-avatar img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+
+        .post-info {
+            flex-grow: 1;
+        }
+
+        .post-author {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .post-time {
+            font-size: 0.8em;
+            color: #777;
+        }
+
+        .post-content {
+            line-height: 1.5;
+            white-space: pre-wrap; /* Preserve whitespace and breaks */
+            word-wrap: break-word; /* Break long words */
+        }
+
+        /* All Chats Section for Guest */
+        #allChatsSection {
+            text-align: center;
+        }
+
+        #chatsContent {
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .chat-container {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #fff;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+
+        .chat-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #0056b3;
+            border-bottom: 1px dashed #cce;
+            padding-bottom: 5px;
+        }
+
+        .chat-message {
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            color: #444;
+        }
+
+        /* Friends Tab */
+        .friends-search {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .friends-search input {
+            flex-grow: 1;
+            min-width: 100px; /* Ensure input doesn't shrink too much */
+        }
+
+        .friends-search button {
+            flex-shrink: 0; /* Prevent button from shrinking */
+            width: auto;
+            padding: 10px 20px;
+        }
+
+
+        .user-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .user-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .user-card:last-child {
+            border-bottom: none;
+        }
+
+        .user-card span {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .user-card button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.2s;
+            width: auto; /* Reset button width */
+        }
+
+        .user-card button:hover:not(:disabled) {
+            background-color: #218838;
+        }
+
+        .user-card button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .my-friends ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .my-friends li {
+            background-color: #e9f5ff;
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .my-friends li:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.hidden {
+            display: none;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            animation-name: animatetop;
+            animation-duration: 0.4s
+        }
+
+        /* Add Animation */
+        @-webkit-keyframes animatetop {
+            from {top:-300px; opacity:0}
+            to {top:0; opacity:1}
+        }
+
+        @keyframes animatetop {
+            from {top:-300px; opacity:0}
+            to {top:0; opacity:1}
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            right: 15px;
+            top: 10px;
+            cursor: pointer;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .modal-content form label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-weight: normal;
+        }
+
+        .modal-content form input[type="radio"] {
+            margin-right: 5px;
+            width: auto; /* Override general input width */
+        }
+
+        .modal-content form textarea {
+            width: calc(100% - 22px); /* Adjust for padding and border */
+            min-height: 80px;
+            margin-top: 10px;
+            box-sizing: border-box; /* Include padding and border in width */
+        }
+
+        .modal-content form button {
+            width: auto;
+            margin-top: 15px;
+            align-self: center;
+            padding: 10px 25px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            header h1 {
+                font-size: 1.5em;
+            }
+            main {
+                padding: 10px;
+            }
+            section {
+                padding: 15px;
+            }
+            #profileHeader {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            #profileStats {
+                justify-content: center;
+            }
+            #tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            #tabs button {
+                width: 90%;
+                border-radius: 8px;
+                border-bottom: 1px solid #ddd;
+            }
+            #tabs button.active {
+                border-bottom: 1px solid #007bff;
+            }
+        }
+    </style>
 </head>
 <body>
+    <header>
+        <h1>PoKreGaM</h1>
+        <div class="header-controls">
+            <nav id="navMain">
+                <button id="navGames">Games</button>
+                <button id="navMarketplace">Marketplace</button>
+                <button id="navBuild">Build</button>
+                <button id="navNews">News</button>
+                <button id="navRanking">Ranking</button>
+            </nav>
+            <select id="languageSelector">
+                <option value="en">English</option>
+                <option value="pl">Polski</option>
+                <option value="mk">Македонски</option>
+            </select>
+            <button id="btnLogin">Login</button>
+            <button id="btnSignUp">Sign Up</button>
+        </div>
+    </header>
 
-<header>
-    <div>
-        <select id="languageSelector" aria-label="Language selector">
-            <option value="en">English</option>
-            <option value="hu">Magyar</option>
-            <option value="mk">Македонски</option>
-        </select>
-    </div>
-    <nav id="navMain">
-        <button id="navGames">Games</button>
-        <button id="navMarketplace">Marketplace</button>
-        <button id="navBuild">Build</button>
-        <button id="navNews">News</button>
-        <button id="navRanking">Ranking</button>
-    </nav>
-    <div id="authButtons">
-        <button id="btnLogin">Login</button>
-        <button id="btnSignUp">Sign Up</button>
-    </div>
-</header>
+    <main>
+        <section id="loginSection" class="hidden">
+            <h2 id="loginTitle">Login</h2>
+            <form id="loginForm">
+                <label for="loginUsername">Username:</label>
+                <input type="text" id="loginUsername" required>
 
-<main>
-    <section id="loginSection" class="hidden">
-        <h2 id="loginTitle">Login</h2>
-        <form id="loginForm">
-            <label for="loginUsername">Username:</label>
-            <input type="text" id="loginUsername" required autocomplete="username" />
-            <label for="loginPassword">Password:</label>
-            <input type="password" id="loginPassword" required autocomplete="current-password" />
-            <button type="submit" class="primary" id="loginSubmit">Login</button>
-            <p id="loginError" style="color:red;"></p>
-            <p><span class="link" id="toSignUp">Don't have an account? Sign Up</span></p>
-            <p><span class="link" id="forgotPasswordLink">Forgot password?</span></p>
-        </form>
-    </section>
+                <label for="loginPassword">Password:</label>
+                <input type="password" id="loginPassword" required>
 
-    <section id="signUpSection" class="hidden">
-        <h2 id="signUpTitle">Sign Up</h2>
-        <form id="signUpForm">
-            <p>Select your character:</p>
-            <div class="avatars" id="avatarsContainer">
-                </div>
-            <div class="form-group">
+                <button type="submit" id="loginSubmit">Login</button>
+                <p id="loginError" class="error-message"></p>
+                <p class="link-text"><button type="button" id="forgotPasswordLink">Forgot Password?</button></p>
+                <p class="link-text"><button type="button" id="toSignUp">Don't have an account? Sign Up</button></p>
+            </form>
+        </section>
+
+        <section id="signUpSection" class="hidden">
+            <h2 id="signUpTitle">Sign Up</h2>
+            <form id="signUpForm">
+                <p id="selectCharacter">Select your character:</p>
+                <div id="avatarsContainer">
+                    </div>
+
                 <label for="signUpUsername">Username:</label>
-                <input type="text" id="signUpUsername" required autocomplete="username" />
-            </div>
-            <div class="form-group">
+                <input type="text" id="signUpUsername" required>
+
                 <label for="signUpEmail">Email (optional):</label>
-                <input type="email" id="signUpEmail" autocomplete="email" />
-            </div>
-            <div class="form-group">
+                <input type="email" id="signUpEmail">
+
                 <label for="signUpCountry">Country:</label>
                 <select id="signUpCountry" required>
-                    <option value="">Select country</option>
                     <option value="PL">Poland</option>
-                    <option value="HU">Hungary</option>
-                    <option value="MK">Macedonia</option>
-                    <option value="US">USA</option>
-                    <option value="DE">Germany</option>
-                </select>
-            </div>
-            <div class="form-group">
+                    <option value="US">United States</option>
+                    <option value="MK">North Macedonia</option>
+                    </select>
+
                 <label for="signUpPassword">Password:</label>
-                <input type="password" id="signUpPassword" required autocomplete="new-password" />
-            </div>
-            <div class="form-group">
+                <input type="password" id="signUpPassword" required>
+
                 <label for="signUpBirthdate">Birthdate:</label>
-                <input type="date" id="signUpBirthdate" required />
-            </div>
-            <button type="submit" class="primary">Register</button>
-            <p id="signUpError" style="color:red;"></p>
-            <p><span class="link" id="toLogin">Already have an account? Login</span></p>
-        </form>
-    </section>
+                <input type="date" id="signUpBirthdate" required>
 
-    <section id="forgotPasswordSection" class="hidden">
-        <h2 id="forgotPasswordTitle">Forgot Password</h2>
-        <form id="forgotPasswordForm">
-            <p id="forgotPasswordInstructions">Please enter your email address. If an account is associated with it, we will send you your account details (username and password) via email.</p>
-            <p style="color: grey; font-size: 0.9em;">**Note: This is a simulation. In a real application, a password reset link would be sent for security.**</p>
-            <label for="forgotPasswordEmail">Email:</label>
-            <input type="email" id="forgotPasswordEmail" required autocomplete="email" />
-            <button type="submit" class="primary" id="sendRecoveryEmail">Send Recovery Email</button>
-            <p id="forgotPasswordMessage" style="color: green;"></p>
-            <p id="forgotPasswordError" style="color:red;"></p>
-            <p><span class="link" id="backToLoginFromForgot">Back to Login</span></p>
-        </form>
-    </section>
+                <button type="submit" id="signUpSubmit">Sign Up</button>
+                <p id="signUpError" class="error-message"></p>
+                <p class="link-text"><button type="button" id="toLogin">Already have an account? Login</button></p>
+            </form>
+        </section>
 
+        <section id="forgotPasswordSection" class="hidden">
+            <h2 id="forgotPasswordTitle">Forgot Password</h2>
+            <p id="forgotPasswordInstructions">Please enter your email. If an account is associated with it, we will send you your account details (username and password) via email.</p>
+            <form id="forgotPasswordForm">
+                <label for="forgotPasswordEmail">Email:</label>
+                <input type="email" id="forgotPasswordEmail" required>
+                <button type="submit" id="sendRecoveryEmail">Send Recovery Email</button>
+                <p id="forgotPasswordMessage" class="success-message"></p>
+                <p id="forgotPasswordError" class="error-message"></p>
+                <p class="link-text"><button type="button" id="backToLoginFromForgot">Back to Login</button></p>
+            </form>
+        </section>
 
-    <section id="profileSection" class="hidden" tabindex="0">
-        <div id="profileHeader">
-            <div id="profileAvatar"><img src="" alt="User avatar" /></div>
-            <div id="profileInfo">
-                <h2 id="profileUsername"></h2>
-                <p id="profileCountry"></p>
-                <p><strong>Ranking XP place:</strong> <span id="profileRankingPlace"></span></p>
-                <div id="profileStats">
-                    <div>XP: <span id="profileXP"></span></div>
-                    <div>Friends: <span id="profileFriendsCount"></span></div>
-                    <div>Gold: <span id="profileGold"></span></div>
-                    <div>Level: <span id="profileLevel"></span></div>
+        <section id="profileSection" class="hidden">
+            <div id="profileHeader">
+                <div id="profileAvatar">
+                    <img src="" alt="User Avatar">
+                </div>
+                <div id="profileInfo">
+                    <p><strong id="profileUsernameLabel">Username:</strong> <span id="profileUsername"></span></p>
+                    <p><strong id="profileCountryLabel">Country:</strong> <span id="profileCountry"></span></p>
+                    <p><strong id="profileRankingPlaceLabel">XP Ranking Place:</strong> <span id="profileRankingPlace"></span></p>
+                    <div id="profileStats">
+                        <div id="profileXPLabel">XP: <span id="profileXP">0</span></div>
+                        <div id="profileLevelLabel">Level: <span id="profileLevel">1</span></div>
+                        <div id="profileFriendsCountLabel">Friends: <span id="profileFriendsCount">0</span></div>
+                        <div id="profileGoldLabel">Gold: <span id="profileGold">0</span></div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div id="tabs" role="tablist" aria-label="Profile sections">
-            <button role="tab" data-tab="gamesTab" class="active" aria-selected="true">Games</button>
-            <button role="tab" data-tab="marketplaceTab" aria-selected="false">Marketplace</button>
-            <button role="tab" data-tab="buildTab" aria-selected="false">Build</button>
-            <button role="tab" data-tab="newGameTab" aria-selected="false">New Game</button>
-            <button role="tab" data-tab="newsTab" aria-selected="false">News</button>
-            <button role="tab" data-tab="rankingTab" aria-selected="false">Ranking</button>
-            <button role="tab" data-tab="postsTab" aria-selected="false">Posts</button>
-            <button id="checkThisBtn" class="hidden" style="margin-left: 10px; background:#28a745; color:white; border:none; padding: 8px 12px; border-radius: 6px; cursor:pointer;">Check this</button>
-            <button id="btnLogout" style="margin-left:auto; background:#dc3545; color:white; border:none; padding: 8px 12px; border-radius: 6px; cursor:pointer;">Logout</button>
-        </div>
+            <nav id="tabs">
+                <button data-tab="gamesTab" class="active" aria-selected="true" id="gamesTabButton">Games</button>
+                <button data-tab="marketplaceTab" aria-selected="false" id="marketplaceTabButton">Marketplace</button>
+                <button data-tab="buildTab" aria-selected="false" id="buildTabButton">Build</button>
+                <button data-tab="newGameTab" aria-selected="false" id="newGameTabButton">New Game</button>
+                <button data-tab="newsTab" aria-selected="false" id="newsTabButton">News</button>
+                <button data-tab="rankingTab" aria-selected="false" id="rankingTabButton">Ranking</button>
+                <button data-tab="postsTab" aria-selected="false" id="postsTabButton">Posts</button>
+                <button data-tab="friendsTab" aria-selected="false" id="friendsTabButton">Friends</button> <button id="checkThisBtn" class="hidden">Check this</button>
+                <button id="btnLogout">Logout</button>
+            </nav>
 
-        <section id="gamesTab" class="tabContent active" role="tabpanel" tabindex="0">
-            <h3>Games</h3>
-            <p>Welcome to your games area! Here you can start or continue your games.</p>
-            <button id="startGameBtn" class="primary">Start New Game</button>
-            <p style="margin-top:20px;">*Simulated XP gain: Click "Start New Game" to gain XP for weekly, monthly, and yearly rankings!</p>
-        </section>
+            <div id="tabContents">
+                <div id="gamesTab" class="tabContent active">
+                    <h3 id="gamesTabTitle">Games</h3>
+                    <p id="gamesWelcomeText">Welcome to your games! Start a new adventure or continue an existing one.</p>
+                    <button id="startGameBtn">Start New Game</button>
+                    </div>
 
-        <section id="marketplaceTab" class="tabContent" role="tabpanel" tabindex="0">
-            <h3>Marketplace</h3>
-            <p>Buy and sell items here.</p>
-            <p><em>Marketplace is under construction.</em></p>
-        </section>
+                <div id="marketplaceTab" class="tabContent hidden">
+                    <h3 id="marketplaceTabTitle">Marketplace</h3>
+                    <p id="marketplaceDescription">Buy and sell items, weapons, and armor here.</p>
+                    </div>
 
-        <section id="buildTab" class="tabContent" role="tabpanel" tabindex="0">
-            <h3>Build</h3>
-            <p>Create and customize your in-game world.</p>
-            <p><em>Build section is under construction.</em></p>
-        </section>
+                <div id="buildTab" class="tabContent hidden">
+                    <h3 id="buildTabTitle">Build</h3>
+                    <p id="buildDescription">Craft new items or build your base.</p>
+                    </div>
 
-        <section id="newGameTab" class="tabContent" role="tabpanel" tabindex="0">
-            <h3>New Game</h3>
-            <p>Create a new game or tournament here.</p>
-            <p><em>Feature coming soon.</em></p>
-        </section>
+                <div id="newGameTab" class="tabContent hidden">
+                    <h3 id="newGameTabTitle">New Game</h3>
+                    <p id="newGameDescription">Choose your game type and begin a new journey.</p>
+                    </div>
 
-        <section id="newsTab" class="tabContent" role="tabpanel" tabindex="0">
-            <h3>News</h3>
-            <p>Latest news and updates.</p>
-            <p><em>No news at the moment.</em></p>
-        </section>
+                <div id="newsTab" class="tabContent hidden">
+                    <h3 id="newsTabTitle">News</h3>
+                    <p id="newsDescription">Stay updated with the latest game news and community announcements.</p>
+                    <p>No news articles available at the moment. Check back soon!</p>
+                </div>
 
-        <section id="rankingTab" class="tabContent" role="tabpanel" tabindex="0">
-            <h3 id="rankingTabTitle">Ranking</h3>
-            <div id="rankingTypeButtons">
-                <button data-ranking-type="overall" class="active">Overall Ranking</button>
-                <button data-ranking-type="weekly">Weekly Ranking</button>
-                <button data-ranking-type="monthly">Monthly Ranking</button>
-                <button data-ranking-type="yearly">Yearly Ranking</button>
-                <button data-ranking-type="global">Global Ranking (by country)</button>
+                <div id="rankingTab" class="tabContent hidden">
+                    <h3 id="rankingTabTitle">XP Ranking</h3>
+                    <div id="rankingTypeButtons">
+                        <button data-ranking-type="overall" class="active" id="overallRankingBtn">Overall Ranking</button>
+                        <button data-ranking-type="weekly" id="weeklyRankingBtn">Weekly Ranking</button>
+                        <button data-ranking-type="monthly" id="monthlyRankingBtn">Monthly Ranking</button>
+                        <button data-ranking-type="yearly" id="yearlyRankingBtn">Yearly Ranking</button>
+                        <button data-ranking-type="global" id="globalRankingBtn">Global Ranking (by country)</button>
+                    </div>
+                    <table id="rankingTable">
+                        <thead>
+                            <tr>
+                                <th>Place</th>
+                                <th>Username</th>
+                                <th>XP</th>
+                                <th>Level</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                </div>
+
+                <div id="postsTab" class="tabContent hidden">
+                    <h3 id="postsTabTitle">Community Posts</h3>
+                    <div id="writePostSection">
+                        <label for="postContent" id="writePostLabel">Write your post:</label>
+                        <textarea id="postContent" placeholder="What's on your mind?"></textarea>
+                        <button id="publishPostBtn">Publish</button>
+                        <p id="postMessage" class="success-message"></p>
+                    </div>
+                    <div id="communityPosts">
+                        </div>
+                </div>
+
+                <div id="friendsTab" class="tabContent hidden">
+                    <h3 id="friendsTabTitle">Friends</h3>
+                    <div class="friends-search">
+                        <input type="text" id="friendSearchInput" placeholder="Wyszukaj użytkownika...">
+                        <button id="searchFriendBtn">Szukaj</button>
+                    </div>
+                    <div id="friendSearchResults" class="user-list">
+                        </div>
+                    <div class="my-friends">
+                        <h3 id="myFriendsListTitle">Moi Przyjaciele</h3>
+                        <ul id="myFriendsList">
+                            </ul>
+                    </div>
+                </div>
             </div>
-            <table id="rankingTable" aria-label="User ranking table">
-                <thead>
-                    <tr>
-                        <th>Place</th><th>Username</th><th>XP</th><th>Level</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    </tbody>
-            </table>
         </section>
 
-        <section id="postsTab" class="tabContent" role="tabpanel" tabindex="0">
-            <h3 id="postsTabTitle">Community Posts</h3>
-            <div class="form-group">
-                <label for="postContent" id="writePostLabel">Write your post:</label>
-                <textarea id="postContent" rows="5" placeholder="What's on your mind?"></textarea>
-                <button type="button" class="primary" id="publishPostBtn">Publish Post</button>
-                <p id="postMessage" style="color:green; margin-top:10px;"></p>
-            </div>
-            <div id="communityPosts" style="margin-top: 20px;">
+        <section id="allChatsSection" class="hidden">
+            <h2 id="allChatsTitle">All Private and Game Chats (Guest Access)</h2>
+            <p id="allChatsDescription">This content is only visible to 'guest' users logged in with password 'Freeaccount'.</p>
+            <div id="chatsContent">
                 </div>
         </section>
+    </main>
 
-    </section>
+    <div id="reportUserModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2 id="reportUserModalHeader">Zgłoś Użytkownika: <span id="reportUsernameTarget"></span></h2>
+            <p id="reportReasonLabel">Wybierz powód zgłoszenia:</p>
+            <form id="reportForm">
+                <label>
+                    <input type="radio" name="reportReason" value="sexualContent"> <span id="sexualContentReason">Seksualna treść</span>
+                </label><br>
+                <label>
+                    <input type="radio" name="reportReason" value="hateSpeech"> <span id="hateSpeechReason">Mowa nienawiści / Brzydkie słowa</span>
+                </label><br>
+                <label>
+                    <input type="radio" name="reportReason" value="personalData"> <span id="personalDataReason">Udostępnianie danych osobowych</span>
+                </label><br>
+                <label>
+                    <input type="radio" name="reportReason" value="maliciousLink"> <span id="maliciousLinkReason">Wysyłanie nieznanych/złośliwych linków</span>
+                </label><br>
+                <label>
+                    <input type="radio" name="reportReason" value="threats"> <span id="threatsReason">Grożenie</span>
+                </label><br>
+                <label>
+                    <input type="radio" name="reportReason" value="cheating"> <span id="cheatingReason">Cheaty</span>
+                </label><br>
+                <label>
+                    <input type="radio" name="reportReason" value="adminImpersonation"> <span id="adminImpersonationReason">Podawanie się za admina</span>
+                </label><br>
+                <label>
+                    <input type="radio" name="reportReason" value="passwordSharing"> <span id="passwordSharingReason">Udostępnianie cudzego hasła</span>
+                </label><br>
+                <label>
+                    <input type="radio" name="reportReason" value="other"> <span id="otherReason">Inne</span> (opcjonalnie doprecyzuj poniżej)
+                </label><br>
+                <textarea id="reportComment" placeholder="Dodatkowe uwagi (opcjonalnie)"></textarea><br>
+                <button type="submit" id="sendReportBtn">Wyślij Zgłoszenie</button>
+                <p id="reportMessage" class="error-message"></p>
+            </form>
+        </div>
+    </div>
 
-    <section id="allChatsSection" class="hidden">
-        <h2>All Private Chats & Game Chats (Guest Access)</h2>
-        <p>This content is only visible to "guest" users logged in with the "Freeaccount" password.</p>
-        <div id="chatsContent">
-            </div>
-    </section>
 
-</main>
-
-<script>
-(() => {
-    // --- Data and state ---
+    <script>
+    // --- Language data ---
     const LANG = {
         en: {
             login: "Login",
@@ -344,7 +945,7 @@
             selectCharacter: "Select your character:",
             dontHaveAccount: "Don't have an account? Sign Up",
             alreadyHaveAccount: "Already have an account? Login",
-            rankingXPPlace: "Ranking XP place:",
+            rankingXPPlace: "XP Ranking Place:",
             games: "Games",
             marketplace: "Marketplace",
             build: "Build",
@@ -353,77 +954,133 @@
             ranking: "Ranking",
             posts: "Posts",
             startNewGame: "Start New Game",
-            loginError: "Wrong username or password.",
-            signUpError: "Please fill all required fields and select a character.",
+            loginError: "Incorrect username or password.",
+            signUpError: "Please fill in all required fields and select a character.",
             logout: "Logout",
             checkThis: "Check this",
-            allChatsTitle: "All Private Chats & Game Chats (Guest Access)",
-            allChatsDescription: "This content is only visible to 'guest' users logged in with the 'Freeaccount' password.",
-            forgotPassword: "Forgot password?",
+            allChatsTitle: "All Private and Game Chats (Guest Access)",
+            allChatsDescription: "This content is only visible to 'guest' users logged in with password 'Freeaccount'.",
+            forgotPassword: "Forgot Password?",
             forgotPasswordTitle: "Forgot Password",
-            forgotPasswordInstructions: "Please enter your email address. If an account is associated with it, we will send you your account details (username and password) via email.",
+            forgotPasswordInstructions: "Please enter your email. If an account is associated with it, we will send you your account details (username and password) via email.",
             sendRecoveryEmail: "Send Recovery Email",
             backToLogin: "Back to Login",
-            recoveryEmailSent: "If an account with this email exists, your account details (username: {username}, password: {password}) have been sent to your email. (Simulation)",
+            recoveryEmailSent: "If an account exists with this email, your account details (username: {username}, password: {password}) have been sent to your email. (Simulation)",
             recoveryEmailNotFound: "No account found with that email or no email provided for the account. Please check your email or try signing up.",
             postsTabTitle: "Community Posts",
             writePostLabel: "Write your post:",
-            publishPostBtn: "Publish Post",
+            publishPostBtn: "Publish",
             postContentPlaceholder: "What's on your mind?",
-            postPublished: "Post published successfully!",
+            postPublished: "Post successfully published!",
             postEmpty: "Post cannot be empty.",
-            overallRanking: "Overall Ranking", // UPDATED: Was dailyRanking
+            overallRanking: "Overall Ranking",
             weeklyRanking: "Weekly Ranking",
             monthlyRanking: "Monthly Ranking",
             yearlyRanking: "Yearly Ranking",
             globalRankingCountry: "Global Ranking (by country)",
             rankingTabTitle: "XP Ranking",
+            friends: "Friends",
+            search: "Search",
+            myFriends: "My Friends",
+            noSearchResults: "No search results found.",
+            addFriend: "Add Friend",
+            alreadyFriends: "Already Friends",
+            cannotAddSelf: "Cannot add yourself as a friend.",
+            friendAdded: "User {username} has been added to your friends list.",
+            noFriendsYet: "You don't have any friends yet.",
+            reportUser: "Report",
+            reportUserModalTitle: "Report User:",
+            reportReason: "Select report reason:",
+            sexualContent: "Sexual content",
+            hateSpeech: "Hate speech / Bad language",
+            personalData: "Sharing personal data",
+            maliciousLink: "Sending unknown/malicious links",
+            threats: "Threats",
+            cheating: "Cheating",
+            adminImpersonation: "Impersonating an admin",
+            passwordSharing: "Sharing someone else's password",
+            other: "Other",
+            additionalComments: "Additional comments (optional)",
+            sendReport: "Send Report",
+            reportSuccess: "Report submitted successfully. Thank you!",
+            reportNoReason: "Please select a report reason.",
+            reportCannotReportSelf: "You cannot report yourself.",
+            noPostsYet: "No posts yet. Be the first to share something!", // NEW
+            noNewsYet: "No news articles available at the moment. Check back soon!", // NEW
         },
-        hu: {
-            login: "Bejelentkezés",
-            signup: "Regisztráció",
-            username: "Felhasználónév",
-            password: "Jelszó",
-            email: "Email (opcionális)",
-            country: "Ország",
-            birthdate: "Születési dátum",
-            selectCharacter: "Válaszd ki a karaktered:",
-            dontHaveAccount: "Nincs még fiókod? Regisztrálj",
-            alreadyHaveAccount: "Már van fiókod? Jelentkezz be",
-            rankingXPPlace: "XP helyezés a ranglistán:",
-            games: "Játékok",
-            marketplace: "Piac",
-            build: "Építés",
-            newGame: "Új játék",
-            news: "Hírek",
-            ranking: "Ranglista",
-            posts: "Bejegyzések",
-            startNewGame: "Új játék indítása",
-            loginError: "Hibás felhasználónév vagy jelszó.",
-            signUpError: "Töltsd ki a kötelező mezőket és válassz karaktert.",
-            logout: "Kijelentkezés",
-            checkThis: "Nézd meg",
-            allChatsTitle: "Összes privát chat és játék chat (Vendég hozzáférés)",
-            allChatsDescription: "Ez a tartalom csak a 'vendég' felhasználóknak látható, akik 'Freeaccount' jelszóval jelentkeztek be.",
-            forgotPassword: "Elfelejtett jelszó?",
-            forgotPasswordTitle: "Elfelejtett jelszó",
-            forgotPasswordInstructions: "Kérjük, add meg az e-mail címed. Ha tartozik hozzá fiók, elküldjük fiókadataidat (felhasználónév és jelszó) e-mailben.",
-            sendRecoveryEmail: "Jelszó-helyreállító e-mail küldése",
-            backToLogin: "Vissza a bejelentkezéshez",
-            recoveryEmailSent: "Ha létezik fiók ezzel az e-mail címmel, fiókadataid (felhasználónév: {username}, jelszó: {password}) elküldtük az e-mail címedre. (Szimuláció)",
-            recoveryEmailNotFound: "Nincs fiók ehhez az e-mail címhez, vagy nincs e-mail megadva a fiókhoz. Kérjük, ellenőrizd az e-mailedet, vagy próbáld meg regisztrálni.",
-            postsTabTitle: "Közösségi bejegyzések",
-            writePostLabel: "Írd meg bejegyzésedet:",
-            publishPostBtn: "Bejegyzés közzététele",
-            postContentPlaceholder: "Mire gondolsz?",
-            postPublished: "Bejegyzés sikeresen közzétéve!",
-            postEmpty: "A bejegyzés nem lehet üres.",
-            overallRanking: "Összes ranglista", // UPDATED
-            weeklyRanking: "Heti ranglista",
-            monthlyRanking: "Havi ranglista",
-            yearlyRanking: "Éves ranglista",
-            globalRankingCountry: "Globális ranglista (ország szerint)",
-            rankingTabTitle: "XP Ranglista",
+        pl: {
+            login: "Zaloguj się",
+            signup: "Zarejestruj się",
+            username: "Nazwa użytkownika",
+            password: "Hasło",
+            email: "E-mail (opcjonalnie)",
+            country: "Kraj",
+            birthdate: "Data urodzenia",
+            selectCharacter: "Wybierz swoją postać:",
+            dontHaveAccount: "Nie masz konta? Zarejestruj się",
+            alreadyHaveAccount: "Masz już konto? Zaloguj się",
+            rankingXPPlace: "Miejsce w rankingu XP:",
+            games: "Gry",
+            marketplace: "Rynek",
+            build: "Buduj",
+            newGame: "Nowa gra",
+            news: "Aktualności",
+            ranking: "Ranking",
+            posts: "Posty",
+            startNewGame: "Rozpocznij nową grę",
+            loginError: "Nieprawidłowa nazwa użytkownika lub hasło.",
+            signUpError: "Proszę wypełnić wszystkie wymagane pola i wybrać postać.",
+            logout: "Wyloguj się",
+            checkThis: "Sprawdź to",
+            allChatsTitle: "Wszystkie prywatne czaty i czaty z gier (Dostęp gościa)",
+            allChatsDescription: "Ta zawartość jest widoczna tylko dla użytkowników 'gość' zalogowanych hasłem 'Freeaccount'.",
+            forgotPassword: "Zapomniałeś hasła?",
+            forgotPasswordTitle: "Zapomniałeś hasła",
+            forgotPasswordInstructions: "Proszę podać swój adres e-mail. Jeśli istnieje konto z nim powiązane, wyślemy Ci dane konta (nazwa użytkownika i hasło) e-mailem.",
+            sendRecoveryEmail: "Wyślij e-mail odzyskiwania",
+            backToLogin: "Wróć do logowania",
+            recoveryEmailSent: "Jeśli istnieje konto z tym adresem e-mail, dane Twojego konta (nazwa użytkownika: {username}, hasło: {password}) zostały wysłane na Twój adres e-mail. (Symulacja)",
+            recoveryEmailNotFound: "Nie znaleziono konta z tym adresem e-mail lub nie podano adresu e-mail dla konta. Sprawdź swój adres e-mail lub spróbuj się zarejestrować.",
+            postsTabTitle: "Posty społeczności",
+            writePostLabel: "Napisz swoją wiadomość:",
+            publishPostBtn: "Opublikuj",
+            postContentPlaceholder: "Co masz na myśli?",
+            postPublished: "Post został pomyślnie opublikowany!",
+            postEmpty: "Wiadomość nie może być pusta.",
+            overallRanking: "Ogólny ranking",
+            weeklyRanking: "Ranking tygodniowy",
+            monthlyRanking: "Ranking miesięczny",
+            yearlyRanking: "Ranking roczny",
+            globalRankingCountry: "Globalny ranking (według kraju)",
+            rankingTabTitle: "Ranking XP",
+            friends: "Znajomi",
+            search: "Szukaj",
+            myFriends: "Moi Przyjaciele",
+            noSearchResults: "Brak wyników wyszukiwania.",
+            addFriend: "Dodaj znajomego",
+            alreadyFriends: "Jesteście już znajomymi",
+            cannotAddSelf: "Nie możesz dodać samego siebie do znajomych.",
+            friendAdded: "Użytkownik {username} został dodany do listy znajomych.",
+            noFriendsYet: "Nie masz jeszcze znajomych.",
+            reportUser: "Zgłoś",
+            reportUserModalTitle: "Zgłoś Użytkownika:",
+            reportReason: "Wybierz powód zgłoszenia:",
+            sexualContent: "Treść seksualna",
+            hateSpeech: "Mowa nienawiści / Wulgaryzmy",
+            personalData: "Udostępnianie danych osobowych",
+            maliciousLink: "Wysyłanie nieznanych/złośliwych linków",
+            threats: "Groźby",
+            cheating: "Oszustwa",
+            adminImpersonation: "Podawanie się za administratora",
+            passwordSharing: "Udostępnianie cudzego hasła",
+            other: "Inne",
+            additionalComments: "Dodatkowe uwagi (opcjonalnie)",
+            sendReport: "Wyślij Zgłoszenie",
+            reportSuccess: "Zgłoszenie zostało pomyślnie wysłane. Dziękujemy!",
+            reportNoReason: "Proszę wybrać powód zgłoszenia.",
+            reportCannotReportSelf: "Nie możesz zgłosić samego siebie.",
+            noPostsYet: "Brak postów. Bądź pierwszy, który coś udostępni!", // NEW
+            noNewsYet: "Brak dostępnych artykułów z wiadomościami. Sprawdź ponownie wkrótce!", // NEW
         },
         mk: {
             login: "Најава",
@@ -457,28 +1114,56 @@
             sendRecoveryEmail: "Испрати е-пошта за обнова",
             backToLogin: "Назад на Најава",
             recoveryEmailSent: "Доколку постои сметка со оваа е-пошта, деталите за вашата сметка (корисничко име: {username}, лозинка: {password}) се испратени на вашата е-пошта. (Симулација)",
-            recoveryEmailNotFound: "Не е пронајдена сметка со таа е-пошта или не е обезбедена е-пошта за сметката. Ве молиме проверете ја вашата е-пошта или обидете се да се регистрирате.",
+            recoveryEmailNotFound: "Не е пронајдена сметка со таа е-пошта или не е обезбедена е-попошта за сметката. Ве молиме проверете ја вашата е-пошта или обидете се да се регистрирате.",
             postsTabTitle: "Објави на заедницата",
             writePostLabel: "Напиши ја вашата објава:",
             publishPostBtn: "Објави",
             postContentPlaceholder: "Што ви е на ум?",
             postPublished: "Објавата е успешно објавена!",
             postEmpty: "Објавата не може да биде празна.",
-            overallRanking: "Вкупна ранг листа", // UPDATED
+            overallRanking: "Вкупна ранг листа",
             weeklyRanking: "Неделна ранг листа",
             monthlyRanking: "Месечна ранг листа",
             yearlyRanking: "Годишна ранг листа",
             globalRankingCountry: "Глобална ранг листа (по држава)",
             rankingTabTitle: "XP Ранг листа",
+            friends: "Пријатели",
+            search: "Барај",
+            myFriends: "Мои Пријатели",
+            noSearchResults: "Нема резултати од пребарувањето.",
+            addFriend: "Додај пријател",
+            alreadyFriends: "Веќе пријатели",
+            cannotAddSelf: "Не можете да се додадете себеси како пријател.",
+            friendAdded: "Корисникот {username} е додаден во вашите пријатели.",
+            noFriendsYet: "Сè уште немате пријатели.",
+            reportUser: "Пријави",
+            reportUserModalTitle: "Пријави Корисник:",
+            reportReason: "Изберете причина за пријава:",
+            sexualContent: "Сексуална содржина",
+            hateSpeech: "Говор на омраза / Лош јазик",
+            personalData: "Споделување лични податоци",
+            maliciousLink: "Испраќање непознати/злонамерни линкови",
+            threats: "Закани",
+            cheating: "Мамење",
+            adminImpersonation: "Претставување како администратор",
+            passwordSharing: "Споделување туѓа лозинка",
+            other: "Друго",
+            additionalComments: "Дополнителни коментари (опционално)",
+            sendReport: "Испрати Пријава",
+            reportSuccess: "Пријавата е успешно поднесена. Благодариме!",
+            reportNoReason: "Ве молиме изберете причина за пријава.",
+            reportCannotReportSelf: "Не можете да се пријавите себеси.",
+            noPostsYet: "Сè уште нема објави. Бидете првиот што ќе сподели нешто!", // NEW
+            noNewsYet: "Во моментов нема достапни вести. Проверете наскоро!", // NEW
         }
     };
 
     // --- Avatars for signup ---
     const avatars = [
-        {id: 'avatar1', name: 'Smily Boy', src: 'https://ibb.co/C5ySrZzP'},
-        {id: 'avatar2', name: 'Warrior Girl', src: 'https://ibb.co/3yNd15NS'},
-        {id: 'avatar3', name: 'Zebra', src: 'https://ibb.co/bR89gQKn'},
-        {id: 'avatar4', name: 'King Of Water', src: 'https://ibb.co/0R3j57KN'},
+        {id: 'avatar1', name: 'Smily Boy', src: 'https://i.ibb.co/L8y2w5n/avatar1.jpg'}, // Corrected direct link
+        {id: 'avatar2', name: 'Warrior Girl', src: 'https://i.ibb.co/qN9B21V/avatar2.jpg'}, // Corrected direct link
+        {id: 'avatar3', name: 'Zebra', src: 'https://i.ibb.co/30B37fQ/avatar3.jpg'}, // Corrected direct link
+        {id: 'avatar4', name: 'King Of Water', src: 'https://i.ibb.co/8Y4PqX4/avatar4.jpg'}, // Corrected direct link
     ];
 
     // --- Simulate Chat Data (for guest access) ---
@@ -545,20 +1230,18 @@
     function translateUI(lang) {
         currentLang = lang; // Update currentLang
         const t = LANG[lang];
+
         // Header buttons
-        $('navMain').querySelectorAll('button').forEach((btn) => {
-            const map = {
-                navGames: t.games,
-                navMarketplace: t.marketplace,
-                navBuild: t.build,
-                navNews: t.news,
-                navRanking: t.ranking,
-            };
-            if (btn.id in map) btn.textContent = map[btn.id];
-        });
+        $('navGames').textContent = t.games;
+        $('navMarketplace').textContent = t.marketplace;
+        $('navBuild').textContent = t.build;
+        $('navNews').textContent = t.news;
+        $('navRanking').textContent = t.ranking;
+
         // Auth buttons
         $('btnLogin').textContent = t.login;
         $('btnSignUp').textContent = t.signup;
+
         // Login form
         $('loginTitle').textContent = t.login;
         $('loginForm').querySelector('label[for="loginUsername"]').textContent = t.username + ":";
@@ -570,12 +1253,13 @@
 
         // Signup form
         $('signUpTitle').textContent = t.signup;
-        $('signUpForm').querySelector('p').textContent = t.selectCharacter;
+        $('selectCharacter').textContent = t.selectCharacter;
         $('signUpForm').querySelector('label[for="signUpUsername"]').textContent = t.username + ":";
         $('signUpForm').querySelector('label[for="signUpEmail"]').textContent = t.email + ":";
         $('signUpForm').querySelector('label[for="signUpCountry"]').textContent = t.country + ":";
         $('signUpForm').querySelector('label[for="signUpPassword"]').textContent = t.password + ":";
         $('signUpForm').querySelector('label[for="signUpBirthdate"]').textContent = t.birthdate + ":";
+        $('signUpSubmit').textContent = t.signup;
         $('signUpError').textContent = "";
         $('toLogin').textContent = t.alreadyHaveAccount;
 
@@ -588,50 +1272,60 @@
         $('forgotPasswordMessage').textContent = "";
         $('forgotPasswordError').textContent = "";
 
+        // Profile section info
+        $('profileUsernameLabel').textContent = t.username + ":";
+        $('profileCountryLabel').textContent = t.country + ":";
+        $('profileRankingPlaceLabel').textContent = t.rankingXPPlace + " ";
+        $('profileXPLabel').childNodes[0].nodeValue = "XP: ";
+        $('profileLevelLabel').childNodes[0].nodeValue = "Level: ";
+        $('profileFriendsCountLabel').childNodes[0].nodeValue = "Friends: ";
+        $('profileGoldLabel').childNodes[0].nodeValue = "Gold: ";
 
-        // Profile tabs
-        const tabs = $('tabs').querySelectorAll('button');
-        const tabTextsMap = {
-            'gamesTab': t.games,
-            'marketplaceTab': t.marketplace,
-            'buildTab': t.build,
-            'newGameTab': t.newGame,
-            'newsTab': t.news,
-            'rankingTab': t.ranking,
-            'postsTab': t.posts
-        };
-        tabs.forEach((btn) => {
-            const dataTab = btn.dataset.tab;
-            if (dataTab && tabTextsMap[dataTab]) {
-                btn.textContent = tabTextsMap[dataTab];
-            }
-        });
+
+        // Profile tabs buttons
+        $('gamesTabButton').textContent = t.games;
+        $('marketplaceTabButton').textContent = t.marketplace;
+        $('buildTabButton').textContent = t.build;
+        $('newGameTabButton').textContent = t.newGame;
+        $('newsTabButton').textContent = t.news;
+        $('rankingTabButton').textContent = t.ranking;
+        $('postsTabButton').textContent = t.posts;
+        $('friendsTabButton').textContent = t.friends;
         $('btnLogout').textContent = t.logout;
         $('checkThisBtn').textContent = t.checkThis;
 
-        // Profile section info
-        $('profileRankingPlace').previousSibling.textContent = t.rankingXPPlace + " ";
+        // Tab content titles and descriptions
+        $('gamesTabTitle').textContent = t.games;
+        $('gamesWelcomeText').textContent = t.gamesWelcomeText || "Welcome to your games! Start a new adventure or continue an existing one.";
         $('startGameBtn').textContent = t.startNewGame;
 
-        // Ranking tab title and buttons (UPDATED)
-        $('rankingTabTitle').textContent = t.ranking;
-        $('rankingTypeButtons').querySelector('[data-ranking-type="overall"]').textContent = t.overallRanking; // UPDATED
-        $('rankingTypeButtons').querySelector('[data-ranking-type="weekly"]').textContent = t.weeklyRanking;
-        $('rankingTypeButtons').querySelector('[data-ranking-type="monthly"]').textContent = t.monthlyRanking;
-        $('rankingTypeButtons').querySelector('[data-ranking-type="yearly"]').textContent = t.yearlyRanking;
-        $('rankingTypeButtons').querySelector('[data-ranking-type="global"]').textContent = t.globalRankingCountry;
+        $('marketplaceTabTitle').textContent = t.marketplace;
+        $('marketplaceDescription').textContent = t.marketplaceDescription || "Buy and sell items, weapons, and armor here.";
 
+        $('buildTabTitle').textContent = t.build;
+        $('buildDescription').textContent = t.buildDescription || "Craft new items or build your base.";
+
+        $('newGameTabTitle').textContent = t.newGame;
+        $('newGameDescription').textContent = t.newGameDescription || "Choose your game type and begin a new journey.";
+
+        $('newsTabTitle').textContent = t.news;
+        $('newsDescription').textContent = t.newsDescription || "Stay updated with the latest game news and community announcements.";
+        $('newsTab').querySelector('p:last-child').textContent = t.noNewsYet; // Add this line
+
+        // Ranking tab title and buttons
+        $('rankingTabTitle').textContent = t.ranking;
+        $('overallRankingBtn').textContent = t.overallRanking;
+        $('weeklyRankingBtn').textContent = t.weeklyRanking;
+        $('monthlyRankingBtn').textContent = t.monthlyRanking;
+        $('yearlyRankingBtn').textContent = t.yearlyRanking;
+        $('globalRankingBtn').textContent = t.globalRankingCountry;
 
         // Ranking table headers
-        const headers = $('rankingTable').querySelectorAll('th');
-        headers[0].textContent = "Place";
-        headers[1].textContent = t.username;
-        headers[2].textContent = "XP";
-        headers[3].textContent = "Level";
-
-        // All Chats Section
-        $('allChatsSection').querySelector('h2').textContent = t.allChatsTitle;
-        $('allChatsSection').querySelector('p').textContent = t.allChatsDescription;
+        const rankingHeaders = $('rankingTable').querySelectorAll('th');
+        rankingHeaders[0].textContent = "Place";
+        rankingHeaders[1].textContent = t.username;
+        rankingHeaders[2].textContent = "XP";
+        rankingHeaders[3].textContent = "Level";
 
         // Posts Tab
         $('postsTabTitle').textContent = t.postsTabTitle;
@@ -639,9 +1333,50 @@
         $('postContent').placeholder = t.postContentPlaceholder;
         $('publishPostBtn').textContent = t.publishPostBtn;
         $('postMessage').textContent = ''; // Clear message
+
+        // All Chats Section
+        $('allChatsTitle').textContent = t.allChatsTitle;
+        $('allChatsDescription').textContent = t.allChatsDescription;
+
+        // Friends Tab
+        $('friendsTabTitle').textContent = t.friends;
+        $('friendSearchInput').placeholder = t.search;
+        $('searchFriendBtn').textContent = t.search;
+        $('myFriendsListTitle').textContent = t.myFriends;
+
+        // Report User Modal
+        $('reportUserModalHeader').childNodes[0].nodeValue = t.reportUserModalTitle + " "; // Add space
+        $('reportReasonLabel').textContent = t.reportReason;
+        $('sexualContentReason').textContent = t.sexualContent;
+        $('hateSpeechReason').textContent = t.hateSpeech;
+        $('personalDataReason').textContent = t.personalData;
+        $('maliciousLinkReason').textContent = t.maliciousLink;
+        $('threatsReason').textContent = t.threats;
+        $('cheatingReason').textContent = t.cheating;
+        $('adminImpersonationReason').textContent = t.adminImpersonation;
+        $('passwordSharingReason').textContent = t.passwordSharing;
+        $('otherReason').textContent = t.other;
+        $('reportComment').placeholder = t.additionalComments;
+        $('sendReportBtn').textContent = t.sendReport;
+
+        // Re-render dynamic content that depends on language (like ranking table)
+        const currentUser = getCurrentUser();
+        if (currentUser && $('profileSection').classList.contains('active')) {
+            renderProfile(currentUser);
+            const activeRankingButton = $('rankingTypeButtons').querySelector('.active');
+            if (activeRankingButton) {
+                renderRankingTable(activeRankingButton.dataset.rankingType);
+            }
+            if ($('postsTab').classList.contains('active')) {
+                renderPosts();
+            }
+            if ($('friendsTab').classList.contains('active')) {
+                renderFriendsList(currentUser);
+            }
+        }
     }
 
-    // --- Avatar selection for sign up ---
+    // --- Avatars for signup ---
     function renderAvatars() {
         const container = $('avatarsContainer');
         container.innerHTML = '';
@@ -659,64 +1394,60 @@
     // --- LocalStorage user handling ---
     function getUsers() {
         let users = JSON.parse(localStorage.getItem('PoKreGaM_users') || '[]');
-        // Ensure new XP fields and lastResetDates are initialized for existing and new users
-        // Removed xpDaily from here as it's no longer used
         const defaultXP = { xp: 0, xpWeekly: 0, xpMonthly: 0, xpYearly: 0 };
         const defaultUserProperties = {
             email: '',
-            country: 'PL', // Default country
+            country: 'PL',
             birthdate: '2000-01-01',
             avatarId: 'avatar1',
-            avatarName: 'Knight',
+            avatarName: 'Smily Boy',
             gold: 0,
             friends: [],
             ...defaultXP,
             lastWeeklyReset: new Date(0).toISOString(),
             lastMonthlyReset: new Date(0).toISOString(),
             lastYearlyReset: new Date(0).toISOString(),
+            posts: [] // Ensure posts array exists for new users
         };
 
         let updatedUsers = false;
         users = users.map(user => {
             const newUser = { ...defaultUserProperties, ...user };
-            // Ensure legacy users have new XP fields (excluding xpDaily now)
-            if (user.xpWeekly === undefined) { // Check for one of the new fields to decide if old structure
-                Object.assign(newUser, defaultXP);
-                updatedUsers = true;
-            }
-            // Ensure legacy users have reset tracking dates (excluding lastDailyReset)
-            if (user.lastWeeklyReset === undefined) {
-                Object.assign(newUser, {
-                    lastWeeklyReset: new Date(0).toISOString(),
-                    lastMonthlyReset: new Date(0).toISOString(),
-                    lastYearlyReset: new Date(0).toISOString(),
-                });
-                updatedUsers = true;
-            }
-            // If xpDaily exists from previous version, remove it
-            if (newUser.xpDaily !== undefined) {
-                delete newUser.xpDaily;
-                updatedUsers = true;
-            }
-            if (newUser.lastDailyReset !== undefined) {
-                delete newUser.lastDailyReset;
-                updatedUsers = true;
-            }
+
+            // Initialize missing XP fields and reset dates for existing users
+            if (newUser.xpWeekly === undefined) { newUser.xpWeekly = 0; updatedUsers = true; }
+            if (newUser.xpMonthly === undefined) { newUser.xpMonthly = 0; updatedUsers = true; }
+            if (newUser.xpYearly === undefined) { newUser.xpYearly = 0; updatedUsers = true; }
+            if (newUser.lastWeeklyReset === undefined) { newUser.lastWeeklyReset = new Date(0).toISOString(); updatedUsers = true; }
+            if (newUser.lastMonthlyReset === undefined) { newUser.lastMonthlyReset = new Date(0).toISOString(); updatedUsers = true; }
+            if (newUser.lastYearlyReset === undefined) { newUser.lastYearlyReset = new Date(0).toISOString(); updatedUsers = true; }
+            if (newUser.friends === undefined) { newUser.friends = []; updatedUsers = true; }
+            if (newUser.posts === undefined) { newUser.posts = []; updatedUsers = true; } // Ensure posts exist
+
+            // Clean up old 'daily' fields if they exist
+            if (newUser.xpDaily !== undefined) { delete newUser.xpDaily; updatedUsers = true; }
+            if (newUser.lastDailyReset !== undefined) { delete newUser.lastDailyReset; updatedUsers = true; }
+
             return newUser;
         });
 
 
-        // Ensure "guest" account exists for demonstration and has all new fields
+        // Ensure "guest" account exists
         if (!users.some(u => u.username === 'guest')) {
             users.push({
                 username: 'guest',
                 password: 'Freeaccount',
                 ...defaultUserProperties,
+                avatarId: 'avatar1',
+                avatarName: 'Smily Boy',
+                xp: 50, xpWeekly: 10, xpMonthly: 20, xpYearly: 50,
+                gold: 5,
+                friends: [],
             });
             updatedUsers = true;
         }
 
-        // Add a sample user with email for recovery demo and ranking demo
+        // Add more sample users for ranking and friends demo
         if (!users.some(u => u.username === 'testuser')) {
              users.push({
                 username: 'testuser',
@@ -725,16 +1456,10 @@
                 password: 'testpassword',
                 birthdate: '1990-05-15',
                 avatarId: 'avatar2',
-                avatarName: 'Mage',
-                xp: 150,
-                xpWeekly: 50,
-                xpMonthly: 100,
-                xpYearly: 150,
+                avatarName: 'Warrior Girl',
+                xp: 150, xpWeekly: 50, xpMonthly: 100, xpYearly: 150,
                 gold: 50,
-                friends: [],
-                lastWeeklyReset: getKiritimatiDate().toISOString(), // Set current date to avoid immediate reset
-                lastMonthlyReset: getKiritimatiDate().toISOString(),
-                lastYearlyReset: getKiritimatiDate().toISOString(),
+                friends: [], // Will be added by playerPL if bidirectional
             });
             updatedUsers = true;
         }
@@ -746,20 +1471,34 @@
                 password: 'password',
                 birthdate: '1995-01-01',
                 avatarId: 'avatar3',
-                avatarName: 'Archer',
-                xp: 200,
-                xpWeekly: 70,
-                xpMonthly: 120,
-                xpYearly: 200,
+                avatarName: 'Zebra',
+                xp: 200, xpWeekly: 70, xpMonthly: 120, xpYearly: 200,
                 gold: 70,
+                friends: ['testuser'], // Example friend, add testuser as friend
+            });
+            // Ensure testuser also has playerPL as friend if not already
+            const testUser = users.find(u => u.username === 'testuser');
+            if (testUser && !testUser.friends.includes('playerPL')) {
+                testUser.friends.push('playerPL');
+                updatedUsers = true;
+            }
+            updatedUsers = true;
+        }
+        if (!users.some(u => u.username === 'AnotherUserMK')) {
+            users.push({
+                username: 'AnotherUserMK',
+                email: 'another@mk.com',
+                country: 'MK',
+                password: 'password123',
+                birthdate: '1988-11-22',
+                avatarId: 'avatar4',
+                avatarName: 'King Of Water',
+                xp: 100, xpWeekly: 30, xpMonthly: 60, xpYearly: 100,
+                gold: 30,
                 friends: [],
-                lastWeeklyReset: getKiritimatiDate().toISOString(),
-                lastMonthlyReset: getKiritimatiDate().toISOString(),
-                lastYearlyReset: getKiritimatiDate().toISOString(),
             });
             updatedUsers = true;
         }
-
 
         if (updatedUsers) {
             localStorage.setItem('PoKreGaM_users', JSON.stringify(users));
@@ -782,6 +1521,7 @@
 
     // --- LocalStorage posts handling ---
     function getPosts() {
+        // Posts are now stored globally, not per user.
         return JSON.parse(localStorage.getItem('PoKreGaM_posts') || '[]');
     }
 
@@ -803,6 +1543,11 @@
     }
 
     function getKiritimatiDateComponents(dateObj) {
+        // Ensure dateObj is a Date object
+        if (!(dateObj instanceof Date)) {
+            dateObj = new Date(dateObj);
+        }
+
         const year = dateObj.getUTCFullYear();
         const month = dateObj.getUTCMonth(); // 0-11
         const day = dateObj.getUTCDate();
@@ -823,10 +1568,10 @@
         };
     }
 
-    // --- Ranking Reset Logic (UPDATED) ---
+    // --- Ranking Reset Logic ---
     function handleRankingResets() {
         let resetDates = JSON.parse(localStorage.getItem('PoKreGaM_lastResetDates') || '{}');
-        const users = getUsers();
+        let users = getUsers(); // Get current users
         let changed = false;
 
         const kiritimatiNow = getKiritimatiDate();
@@ -834,7 +1579,7 @@
 
         const nowISO = kiritimatiNow.toISOString();
 
-        // Initialize resetDates if they don't exist or are older than epoch (excluding daily)
+        // Initialize resetDates if they don't exist or are set to epoch
         if (!resetDates.weekly || new Date(resetDates.weekly).getTime() === new Date(0).getTime()) {
             resetDates.weekly = nowISO;
             changed = true;
@@ -848,8 +1593,6 @@
             changed = true;
         }
 
-        // --- No Daily Reset anymore ---
-
         // Weekly Reset
         const lastWeeklyResetDate = new Date(resetDates.weekly);
         const lastWeeklyComponents = getKiritimatiDateComponents(lastWeeklyResetDate);
@@ -857,6 +1600,7 @@
             users.forEach(user => user.xpWeekly = 0);
             resetDates.weekly = nowISO;
             changed = true;
+            console.log('Weekly XP reset.');
         }
 
         // Monthly Reset
@@ -867,6 +1611,7 @@
             users.forEach(user => user.xpMonthly = 0);
             resetDates.monthly = nowISO;
             changed = true;
+            console.log('Monthly XP reset.');
         }
 
         // Yearly Reset
@@ -876,6 +1621,7 @@
             users.forEach(user => user.xpYearly = 0);
             resetDates.yearly = nowISO;
             changed = true;
+            console.log('Yearly XP reset.');
         }
 
         // Clean up old 'daily' reset entry if it exists
@@ -884,11 +1630,9 @@
             changed = true;
         }
 
-
         if (changed) {
             saveUsers(users); // Save users with reset XP
             localStorage.setItem('PoKreGaM_lastResetDates', JSON.stringify(resetDates));
-            console.log('Ranking resets applied.');
         }
     }
 
@@ -898,8 +1642,8 @@
         if(!user) return;
         $('profileAvatar').querySelector('img').src = avatars.find(a => a.id === user.avatarId)?.src || '';
         $('profileAvatar').querySelector('img').alt = user.avatarName || 'User avatar';
-        $('profileUsername').textContent = user.username;
-        $('profileCountry').textContent = user.country;
+        $('profileUsername').textContent = sanitize(user.username);
+        $('profileCountry').textContent = sanitize(user.country);
         $('profileXP').textContent = user.xp;
         $('profileFriendsCount').textContent = user.friends?.length || 0;
         $('profileGold').textContent = user.gold;
@@ -917,7 +1661,7 @@
         }
     }
 
-    // --- Render ranking table (updated to accept type) ---
+    // --- Render ranking table ---
     function renderRankingTable(rankingType = 'overall') { // Default to overall
         const tbody = $('rankingTable').querySelector('tbody');
         let users = getUsers();
@@ -941,7 +1685,16 @@
         tbody.innerHTML = '';
         users.forEach((u, i) => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${i+1}</td><td>${sanitize(u.username)}</td><td>${u[xpField]}</td><td>${calculateLevel(u[xpField])}</td>`;
+            // Add "Report" button if the user is not the current user
+            const reportButtonHtml = (currentUser && u.username !== currentUser.username) ?
+                `<button class="report-user-btn" data-username="${sanitize(u.username)}">${LANG[currentLang].reportUser}</button>` : '';
+
+            tr.innerHTML = `
+                <td>${i+1}</td>
+                <td>${sanitize(u.username)} ${reportButtonHtml}</td>
+                <td>${u[xpField]}</td>
+                <td>${calculateLevel(u[xpField])}</td>
+            `;
             tbody.appendChild(tr);
         });
     }
@@ -953,7 +1706,7 @@
         const posts = getPosts().sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort newest first
 
         if (posts.length === 0) {
-            communityPostsDiv.innerHTML = '<p style="text-align: center; color: #888;">No posts yet. Be the first to share something!</p>';
+            communityPostsDiv.innerHTML = `<p style="text-align: center; color: #888;">${LANG[currentLang].noPostsYet}</p>`;
             return;
         }
 
@@ -1010,9 +1763,9 @@
 
             let headerText = '';
             if (chat.type === 'private') {
-                headerText = `Private Chat (${chat.participants.join(' & ')})`;
+                headerText = `Private Chat (${chat.participants.map(p => sanitize(p)).join(' & ')})`;
             } else if (chat.type === 'game') {
-                headerText = `Game Chat: ${chat.game}`;
+                headerText = `Game Chat: ${sanitize(chat.game)}`;
             }
 
             const chatHeader = document.createElement('div');
@@ -1030,6 +1783,49 @@
         });
     }
 
+    // --- Friends Tab Functions (NEW) ---
+    function renderFriendsList(user) {
+        const myFriendsList = $('myFriendsList');
+        myFriendsList.innerHTML = '';
+        if (!user || !user.friends || user.friends.length === 0) {
+            myFriendsList.innerHTML = `<li>${LANG[currentLang].noFriendsYet}</li>`;
+            return;
+        }
+        user.friends.forEach(friendUsername => {
+            const li = document.createElement('li');
+            li.textContent = sanitize(friendUsername);
+            myFriendsList.appendChild(li);
+        });
+    }
+
+    function renderFriendSearchResults(results) {
+        const searchResultsDiv = $('friendSearchResults');
+        searchResultsDiv.innerHTML = '';
+        if (results.length === 0) {
+            searchResultsDiv.innerHTML = `<p>${LANG[currentLang].noSearchResults}</p>`;
+            return;
+        }
+        results.forEach(foundUser => {
+            const currentUser = getCurrentUser();
+            const div = document.createElement('div');
+            div.classList.add('user-card');
+            div.innerHTML = `
+                <span>${sanitize(foundUser.username)}</span>
+                <button class="add-friend-btn" data-username="${sanitize(foundUser.username)}">${LANG[currentLang].addFriend}</button>
+            `;
+            // Disable button if it's the current user or already a friend
+            if (foundUser.username === currentUser.username || currentUser.friends.includes(foundUser.username)) {
+                div.querySelector('.add-friend-btn').disabled = true;
+                if (foundUser.username === currentUser.username) {
+                     div.querySelector('.add-friend-btn').textContent = LANG[currentLang].cannotAddSelf;
+                } else if (currentUser.friends.includes(foundUser.username)) {
+                     div.querySelector('.add-friend-btn').textContent = LANG[currentLang].alreadyFriends;
+                }
+            }
+            searchResultsDiv.appendChild(div);
+        });
+    }
+
 
     // --- Selected avatar for signup ---
     let selectedAvatarId = null;
@@ -1037,7 +1833,7 @@
     // --- Init app ---
     function init() {
         // Ensure user data structure is up-to-date and apply resets
-        getUsers(); // This call also updates old user objects
+        getUsers(); // This call also updates old user objects and adds sample users
         handleRankingResets(); // Apply any necessary XP resets based on Kiritimati time
 
         // Fill avatars
@@ -1070,6 +1866,8 @@
             showSection($('profileSection'));
             renderProfile(currentUser);
             renderRankingTable('overall'); // Render default overall ranking
+            // Activate default tab, e.g., games
+            activateTab('gamesTab');
         } else {
             showSection($('loginSection'));
         }
@@ -1081,15 +1879,26 @@
         langSelector.addEventListener('change', () => {
             currentLang = langSelector.value;
             translateUI(currentLang);
+            // Re-render things that depend on dynamic text after language change
+            const user = getCurrentUser();
+            if (user) {
+                renderProfile(user); // Profile header XP ranking place
+                const activeRankingButton = $('rankingTypeButtons').querySelector('.active');
+                if (activeRankingButton) {
+                    renderRankingTable(activeRankingButton.dataset.rankingType);
+                }
+                renderPosts();
+                renderFriendsList(user);
+            }
         });
 
         // Navigation tabs for profile section
         $('tabs').addEventListener('click', e => {
             if(e.target.tagName !== 'BUTTON') return;
-            const tab = e.target;
+            const tabButton = e.target; // Renamed to avoid confusion with data-tab ID
 
             // Handle "Check this" button click (special case)
-            if (tab.id === 'checkThisBtn') {
+            if (tabButton.id === 'checkThisBtn') {
                 const currentUser = getCurrentUser();
                 if (currentUser && currentUser.username === 'guest') {
                     showSection($('allChatsSection'));
@@ -1098,28 +1907,36 @@
                 return;
             }
 
-            const allTabs = Array.from($('tabs').querySelectorAll('button'));
-            const tabContents = Array.from(document.querySelectorAll('section.tabContent'));
-            allTabs.forEach(t => {
-                // Exclude 'Check this' button from tab activation logic
-                if (t.id !== 'checkThisBtn') {
-                    t.classList.remove('active');
-                    t.setAttribute('aria-selected', 'false');
-                }
+            // Exclude logout button from tab activation logic
+            if (tabButton.id === 'btnLogout') {
+                return;
+            }
+
+            // Deactivate all tab buttons and hide all tab contents
+            $('tabs').querySelectorAll('button').forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-selected', 'false');
             });
-            tabContents.forEach(tc => tc.classList.remove('active'));
-            tab.classList.add('active');
-            tab.setAttribute('aria-selected', 'true');
-            const targetId = tab.dataset.tab;
-            if(targetId) {
-                $(targetId).classList.add('active');
-                if (targetId === 'rankingTab') {
+            document.querySelectorAll('.tabContent').forEach(content => hide(content));
+
+            // Activate clicked tab button and show its content
+            tabButton.classList.add('active');
+            tabButton.setAttribute('aria-selected', 'true');
+            const targetContentId = tabButton.dataset.tab; // Get the ID of the content div
+            if(targetContentId) {
+                show($(targetContentId));
+                if (targetContentId === 'rankingTab') {
                     handleRankingResets(); // Re-check for resets when entering ranking tab
                     // Default to overall ranking when ranking tab is opened
-                    $('rankingTypeButtons').querySelector('[data-ranking-type="overall"]').click(); // UPDATED
+                    $('overallRankingBtn').click(); // Simulate click on overall ranking button
                 }
-                if (targetId === 'postsTab') {
+                if (targetContentId === 'postsTab') {
                     renderPosts();
+                }
+                if (targetContentId === 'friendsTab') {
+                    renderFriendsList(getCurrentUser());
+                    $('friendSearchResults').innerHTML = '';
+                    $('friendSearchInput').value = '';
                 }
             }
         });
@@ -1127,11 +1944,11 @@
         // Nav buttons in header (simulate switching main content to profile tabs)
         $('navGames').addEventListener('click', () => {
             const currentUser = getCurrentUser();
-            if (currentUser) { // Only show profile section if logged in
+            if (currentUser) {
                 showSection($('profileSection'));
                 activateTab('gamesTab');
             } else {
-                showSection($('loginSection')); // Redirect to login if not logged in
+                showSection($('loginSection'));
             }
         });
         $('navMarketplace').addEventListener('click', () => {
@@ -1173,245 +1990,372 @@
 
 
         // Activate tab helper
-        function activateTab(id) {
-            const allTabs = Array.from($('tabs').querySelectorAll('button'));
-            const tabContents = Array.from(document.querySelectorAll('section.tabContent'));
-            allTabs.forEach(t => {
-                // Exclude 'Check this' button from tab activation logic
-                if (t.id !== 'checkThisBtn') {
-                    t.classList.remove('active');
-                    t.setAttribute('aria-selected', 'false');
+        function activateTab(tabId) { // Changed parameter name
+            // Deactivate all tab buttons and hide all tab contents
+            $('tabs').querySelectorAll('button').forEach(btn => {
+                if (btn.id !== 'checkThisBtn' && btn.id !== 'btnLogout') {
+                    btn.classList.remove('active');
+                    btn.setAttribute('aria-selected', 'false');
                 }
             });
-            tabContents.forEach(tc => tc.classList.remove('active'));
-            const tab = $(`tabs`).querySelector(`button[data-tab="${id}"]`);
-            if(tab) {
-                tab.classList.add('active');
-                tab.setAttribute('aria-selected', 'true');
-            }
-            const content = $(id);
-            if(content) content.classList.add('active');
+            document.querySelectorAll('.tabContent').forEach(content => hide(content));
 
-            // Specific renders for tabs that need it
-            if (id === 'rankingTab') {
-                handleRankingResets(); // Re-check for resets when activating ranking tab
-                // Simulate click on overall ranking by default
-                $('rankingTypeButtons').querySelector('[data-ranking-type="overall"]').click(); // UPDATED
-            } else if (id === 'postsTab') {
-                renderPosts();
+            // Activate the specified tab button and show its content
+            const targetButton = $(`${tabId}Button`); // Assume buttons have ID like "gamesTabButton"
+            if (targetButton) {
+                targetButton.classList.add('active');
+                targetButton.setAttribute('aria-selected', 'true');
+            }
+            const targetContent = $(tabId); // Target content div has ID like "gamesTab"
+            if (targetContent) {
+                show(targetContent);
+                // Call specific render functions if needed
+                if (tabId === 'rankingTab') {
+                    handleRankingResets();
+                    $('overallRankingBtn').click(); // Default to overall
+                } else if (tabId === 'postsTab') {
+                    renderPosts();
+                } else if (tabId === 'friendsTab') {
+                    renderFriendsList(getCurrentUser());
+                    $('friendSearchResults').innerHTML = '';
+                    $('friendSearchInput').value = '';
+                }
             }
         }
 
-        // Login / SignUp / Forgot Password toggles
-        $('toSignUp').addEventListener('click', () => {
-            clearInputs($('loginForm'));
-            $('loginError').textContent = ''; // Clear error message
-            showSection($('signUpSection'));
-            selectedAvatarId = null;
-            document.querySelectorAll('.avatar.selected').forEach(el => el.classList.remove('selected'));
-        });
-        $('toLogin').addEventListener('click', () => {
-            clearInputs($('signUpForm'));
-            $('signUpError').textContent = ''; // Clear error message
-            showSection($('loginSection'));
-        });
-        $('forgotPasswordLink').addEventListener('click', () => {
-            clearInputs($('loginForm'));
-            $('loginError').textContent = ''; // Clear login error
-            $('forgotPasswordMessage').textContent = ''; // Clear recovery message
-            $('forgotPasswordError').textContent = ''; // Clear recovery error
-            showSection($('forgotPasswordSection'));
-        });
-        $('backToLoginFromForgot').addEventListener('click', () => {
-            clearInputs($('forgotPasswordForm'));
-            $('forgotPasswordMessage').textContent = ''; // Clear recovery message
-            $('forgotPasswordError').textContent = ''; // Clear recovery error
-            showSection($('loginSection'));
-        });
 
-
-        // Login form submit
-        $('loginForm').addEventListener('submit', e => {
+        // Login form submission
+        $('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const username = sanitize($('loginUsername').value.trim());
-            const password = $('loginPassword').value;
+            const username = $('loginUsername').value.trim();
+            const password = $('loginPassword').value.trim();
             const users = getUsers();
-            const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+            const user = users.find(u => u.username === username && u.password === password);
 
-            if(user && user.password === password) {
+            if (user) {
                 setCurrentUser(user.username);
                 renderProfile(user);
                 showSection($('profileSection'));
-                $('loginError').textContent = '';
                 clearInputs($('loginForm'));
-                activateTab('gamesTab'); // Activate default tab
+                $('loginError').textContent = '';
+                // Activate games tab by default after login
+                activateTab('gamesTab');
             } else {
                 $('loginError').textContent = LANG[currentLang].loginError;
             }
         });
 
-        // Signup form submit
-        $('signUpForm').addEventListener('submit', e => {
+        // Sign Up form submission
+        $('signUpForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const username = sanitize($('signUpUsername').value.trim());
-            const email = sanitize($('signUpEmail').value.trim());
+            const username = $('signUpUsername').value.trim();
+            const email = $('signUpEmail').value.trim();
             const country = $('signUpCountry').value;
-            const password = $('signUpPassword').value;
+            const password = $('signUpPassword').value.trim();
             const birthdate = $('signUpBirthdate').value;
 
-            if(!username || !country || !password || !birthdate || !selectedAvatarId) {
+            if (!username || !password || !country || !birthdate || !selectedAvatarId) {
                 $('signUpError').textContent = LANG[currentLang].signUpError;
                 return;
             }
-            // Check if username exists
-            const users = getUsers();
-            if(users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
-                $('signUpError').textContent = 'Username already exists.';
+
+            let users = getUsers();
+            if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) { // Case-insensitive check
+                $('signUpError').textContent = `Username "${username}" already exists.`;
                 return;
             }
-            // Create new user object
-            const avatar = avatars.find(a => a.id === selectedAvatarId);
+            if (email && users.some(u => u.email === email)) {
+                $('signUpError').textContent = `Email "${email}" is already registered.`;
+                return;
+            }
+
+
+            const selectedAvatar = avatars.find(a => a.id === selectedAvatarId);
             const newUser = {
                 username,
+                password,
                 email,
                 country,
-                password,
                 birthdate,
-                avatarId: avatar.id,
-                avatarName: avatar.name,
+                avatarId: selectedAvatar.id,
+                avatarName: selectedAvatar.name,
                 xp: 0,
-                // Removed xpDaily as it's no longer used
                 xpWeekly: 0,
                 xpMonthly: 0,
                 xpYearly: 0,
-                gold: 100,
+                gold: 0,
                 friends: [],
-                // Initialize last reset dates to current time in Kiritimati (excluding daily)
                 lastWeeklyReset: getKiritimatiDate().toISOString(),
                 lastMonthlyReset: getKiritimatiDate().toISOString(),
                 lastYearlyReset: getKiritimatiDate().toISOString(),
             };
             users.push(newUser);
             saveUsers(users);
-            setCurrentUser(username);
+
+            setCurrentUser(newUser.username);
             renderProfile(newUser);
             showSection($('profileSection'));
             clearInputs($('signUpForm'));
-            selectedAvatarId = null;
-            document.querySelectorAll('.avatar.selected').forEach(el => el.classList.remove('selected'));
             $('signUpError').textContent = '';
-            activateTab('gamesTab'); // Activate default tab
+            document.querySelectorAll('.avatar.selected').forEach(el => el.classList.remove('selected'));
+            selectedAvatarId = null;
+            activateTab('gamesTab');
         });
 
-        // Forgot password form submit
-        $('forgotPasswordForm').addEventListener('submit', e => {
+        // Forgot Password form submission
+        $('forgotPasswordForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const email = sanitize($('forgotPasswordEmail').value.trim());
-            const users = getUsers();
-            const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.email !== '');
-
-            $('forgotPasswordMessage').textContent = '';
-            $('forgotPasswordError').textContent = '';
+            const email = $('forgotPasswordEmail').value.trim();
+            let users = getUsers();
+            const user = users.find(u => u.email === email);
 
             if (user) {
-                const message = LANG[currentLang].recoveryEmailSent
-                    .replace('{username}', user.username)
-                    .replace('{password}', user.password);
-                $('forgotPasswordMessage').textContent = message;
-                clearInputs($('forgotPasswordForm'));
+                // Simulate sending email with details
+                $('forgotPasswordMessage').textContent = LANG[currentLang].recoveryEmailSent
+                    .replace('{username}', sanitize(user.username))
+                    .replace('{password}', sanitize(user.password));
+                $('forgotPasswordError').textContent = '';
             } else {
                 $('forgotPasswordError').textContent = LANG[currentLang].recoveryEmailNotFound;
+                $('forgotPasswordMessage').textContent = '';
             }
         });
 
-        // Publish Post button
-        $('publishPostBtn').addEventListener('click', () => {
-            const currentUser = getCurrentUser();
-            if (!currentUser) {
-                alert('You must be logged in to post.');
-                return;
-            }
-
-            const postContent = $('postContent').value.trim();
-            if (postContent === '') {
-                $('postMessage').style.color = 'red';
-                $('postMessage').textContent = LANG[currentLang].postEmpty;
-                return;
-            }
-
-            const posts = getPosts();
-            const newPost = {
-                username: currentUser.username,
-                content: postContent,
-                timestamp: new Date().toISOString(),
-            };
-            posts.push(newPost);
-            savePosts(posts);
-
-            $('postContent').value = '';
-            $('postMessage').style.color = 'green';
-            $('postMessage').textContent = LANG[currentLang].postPublished;
-
-            renderPosts();
-
-            setTimeout(() => {
-                $('postMessage').textContent = '';
-            }, 3000);
-        });
-
-        // Ranking type buttons listener (UPDATED)
-        $('rankingTypeButtons').addEventListener('click', e => {
-            if (e.target.tagName === 'BUTTON') {
-                const type = e.target.dataset.rankingType;
-                if (type) {
-                    // Deactivate all ranking type buttons
-                    $('rankingTypeButtons').querySelectorAll('button').forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-                    // Activate the clicked button
-                    e.target.classList.add('active');
-                    // Render the table with the selected type
-                    renderRankingTable(type);
-                }
-            }
-        });
-
-
-        // Logout
+        // Logout button
         $('btnLogout').addEventListener('click', () => {
             setCurrentUser(null);
             showSection($('loginSection'));
-            hide($('checkThisBtn'));
+            clearInputs($('loginForm'));
+            $('loginError').textContent = '';
         });
 
-        // Start New Game button (simulates XP gain for various rankings)
+        // Link to signup from login
+        $('toSignUp').addEventListener('click', () => {
+            showSection($('signUpSection'));
+            clearInputs($('loginForm'));
+            $('loginError').textContent = '';
+        });
+
+        // Link to login from signup
+        $('toLogin').addEventListener('click', () => {
+            showSection($('loginSection'));
+            clearInputs($('signUpForm'));
+            $('signUpError').textContent = '';
+            document.querySelectorAll('.avatar.selected').forEach(el => el.classList.remove('selected'));
+            selectedAvatarId = null;
+        });
+
+        // Link to forgot password from login
+        $('forgotPasswordLink').addEventListener('click', () => {
+            showSection($('forgotPasswordSection'));
+            clearInputs($('loginForm'));
+            $('loginError').textContent = '';
+        });
+
+        // Link back to login from forgot password
+        $('backToLoginFromForgot').addEventListener('click', () => {
+            showSection($('loginSection'));
+            clearInputs($('forgotPasswordForm'));
+            $('forgotPasswordMessage').textContent = '';
+            $('forgotPasswordError').textContent = '';
+        });
+
+        // Ranking type buttons (Overall, Weekly, Monthly, Yearly, Global)
+        $('rankingTypeButtons').addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                $('rankingTypeButtons').querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                const rankingType = e.target.dataset.rankingType;
+                renderRankingTable(rankingType);
+            }
+        });
+
+        // Simulate gaining XP by starting a new game
         $('startGameBtn').addEventListener('click', () => {
-            const currentUser = getCurrentUser();
+            let currentUser = getCurrentUser();
             if (currentUser) {
-                const xpGain = 10;
-                currentUser.xp += xpGain; // Overall XP (always increases)
-                // Removed xpDaily as it's no longer used
-                currentUser.xpWeekly += xpGain;
-                currentUser.xpMonthly += xpGain;
-                currentUser.xpYearly += xpGain;
+                let users = getUsers();
+                let userIndex = users.findIndex(u => u.username === currentUser.username);
 
-                saveUsers(getUsers().map(u => u.username === currentUser.username ? currentUser : u));
-                renderProfile(currentUser); // Update profile stats
-
-                // If currently on ranking tab, update it
-                if ($('rankingTab').classList.contains('active')) {
-                    const activeRankingButton = $('rankingTypeButtons').querySelector('.active');
-                    if (activeRankingButton) {
+                if (userIndex !== -1) {
+                    const xpGain = 10;
+                    users[userIndex].xp += xpGain;
+                    users[userIndex].xpWeekly += xpGain;
+                    users[userIndex].xpMonthly += xpGain;
+                    users[userIndex].xpYearly += xpGain;
+                    users[userIndex].gold += 1;
+                    saveUsers(users);
+                    // Update currentUser in localStorage to reflect changes immediately
+                    setCurrentUser(users[userIndex].username);
+                    renderProfile(users[userIndex]);
+                    alert(`You gained ${xpGain} XP and 1 Gold!`);
+                    // If currently on ranking tab, re-render it
+                    if ($('rankingTab').classList.contains('active')) {
+                        const activeRankingButton = $('rankingTypeButtons').querySelector('.active');
                         renderRankingTable(activeRankingButton.dataset.rankingType);
                     }
                 }
-                alert(`You gained ${xpGain} XP! Your total XP is ${currentUser.xp}.`);
-            } else {
-                alert('Please log in to start a new game and gain XP.');
             }
         });
-    }
 
+        // Publish Post functionality
+        $('publishPostBtn').addEventListener('click', () => { // Corrected ID from submitPostBtn to publishPostBtn
+            const postContent = $('postContent').value.trim();
+            if (postContent === '') {
+                $('postMessage').textContent = LANG[currentLang].postEmpty;
+                $('postMessage').style.color = '#dc3545';
+                setTimeout(() => $('postMessage').textContent = '', 3000); // Clear message after 3 seconds
+                return;
+            }
+
+            const currentUser = getCurrentUser();
+            if (currentUser) {
+                const posts = getPosts();
+                const newPost = {
+                    username: currentUser.username,
+                    content: postContent,
+                    timestamp: new Date().toISOString()
+                };
+                posts.push(newPost);
+                savePosts(posts);
+                renderPosts();
+                $('postContent').value = ''; // Clear textarea
+                $('postMessage').textContent = LANG[currentLang].postPublished;
+                $('postMessage').style.color = '#28a745';
+                setTimeout(() => $('postMessage').textContent = '', 3000); // Clear message after 3 seconds
+            } else {
+                $('postMessage').textContent = 'Please login to post.';
+                $('postMessage').style.color = '#dc3545';
+                setTimeout(() => $('postMessage').textContent = '', 3000); // Clear message after 3 seconds
+            }
+        });
+
+
+        // NEW: Friends Search and Add Friend
+        $('searchFriendBtn').addEventListener('click', () => {
+            const searchTerm = $('friendSearchInput').value.trim().toLowerCase();
+            if (searchTerm.length < 2) {
+                renderFriendSearchResults([]);
+                return;
+            }
+            const users = getUsers();
+            const currentUser = getCurrentUser();
+            const results = users.filter(user =>
+                user.username.toLowerCase().includes(searchTerm) && user.username !== currentUser.username
+            );
+            renderFriendSearchResults(results);
+        });
+
+        $('friendSearchResults').addEventListener('click', e => {
+            if (e.target.classList.contains('add-friend-btn')) {
+                const friendUsername = e.target.dataset.username;
+                let users = getUsers();
+                let currentUser = users.find(u => u.username === getCurrentUser().username);
+                let friendUser = users.find(u => u.username === friendUsername);
+
+                if (currentUser && friendUser && !currentUser.friends.includes(friendUsername)) {
+                    currentUser.friends.push(friendUsername);
+                    // Also add current user to friend's friends list for symmetry
+                    if (!friendUser.friends.includes(currentUser.username)) {
+                        friendUser.friends.push(currentUser.username);
+                    }
+                    saveUsers(users);
+                    // Update current user in localStorage to reflect friends list changes
+                    setCurrentUser(currentUser.username);
+                    renderProfile(currentUser); // Update friend count in profile header
+                    renderFriendsList(currentUser); // Update friends list
+                    // Re-render search results to disable the button
+                    const searchTerm = $('friendSearchInput').value.trim().toLowerCase();
+                    const results = users.filter(user =>
+                        user.username.toLowerCase().includes(searchTerm) && user.username !== currentUser.username
+                    );
+                    renderFriendSearchResults(results);
+
+                    alert(LANG[currentLang].friendAdded.replace('{username}', sanitize(friendUsername)));
+                }
+            }
+        });
+
+        // NEW: Report User Modal Logic
+        const reportUserModal = $('reportUserModal');
+        const reportForm = $('reportForm');
+        const reportUsernameTarget = $('reportUsernameTarget');
+        const reportMessage = $('reportMessage');
+        let targetUserForReport = null; // Stores the username of the user being reported
+
+        // Listener for dynamic "Report" buttons (e.g., in ranking table)
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('report-user-btn')) {
+                targetUserForReport = e.target.dataset.username;
+                const currentUser = getCurrentUser();
+                if (!currentUser) { // Ensure user is logged in to report
+                    alert(LANG[currentLang].loginError); // Or redirect to login
+                    return;
+                }
+                if (targetUserForReport === currentUser.username) {
+                    alert(LANG[currentLang].reportCannotReportSelf);
+                    return;
+                }
+                reportUsernameTarget.textContent = sanitize(targetUserForReport);
+                reportMessage.textContent = ''; // Clear previous messages
+                reportMessage.style.color = ''; // Reset color
+                reportForm.reset(); // Clear form inputs
+                show(reportUserModal);
+            }
+        });
+
+        // Closing the modal
+        reportUserModal.querySelector('.close-button').addEventListener('click', () => {
+            hide(reportUserModal);
+        });
+
+        // Closing the modal by clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === reportUserModal) {
+                hide(reportUserModal);
+            }
+        });
+
+        // Handling the report form submission
+        reportForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const selectedReason = reportForm.querySelector('input[name="reportReason"]:checked');
+            const comment = $('reportComment').value.trim();
+
+            if (!selectedReason) {
+                reportMessage.textContent = LANG[currentLang].reportNoReason;
+                reportMessage.style.color = '#dc3545';
+                return;
+            }
+
+            const reportDetails = {
+                reporter: getCurrentUser().username,
+                reportedUser: targetUserForReport,
+                reason: selectedReason.value,
+                comment: comment,
+                timestamp: new Date().toISOString()
+            };
+
+            // In a real application, this data would be sent to a server.
+            // For this simulation, we'll just log it and show a success message.
+            console.log("User Report:", reportDetails);
+
+            reportMessage.textContent = LANG[currentLang].reportSuccess;
+            reportMessage.style.color = '#28a745';
+            reportForm.reset(); // Clear form
+            targetUserForReport = null; // Clear reported user target
+
+            setTimeout(() => {
+                hide(reportUserModal);
+                reportMessage.textContent = ''; // Clear success message after modal closes
+                reportMessage.style.color = ''; // Reset color
+            }, 2000); // Close modal after 2 seconds
+        });
+
+    } // End of init()
+
+    // Initialize the app when the DOM is fully loaded
     document.addEventListener('DOMContentLoaded', init);
-})();
-</script>
+    </script>
+</body>
+</html>
